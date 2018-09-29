@@ -8,7 +8,7 @@ output: html_notebook
 library(Quandl)
 library(tidyverse)
 library(tidyquant)
-list = c("CHRIS/CME_DA1", "CHRIS/ICE_KC1", "CHRIS/CME_C1","CHRIS/ICE_KC1", "CHRIS/ICE_CC1", "CHRIS/CME_RR1", "CHRIS/ICE_SB1", "CHRIS/ICE_OJ1", "CHRIS/CME_O1", "CHRIS/CME_LN1")
+list = c("CHRIS/CME_DA1", "CHRIS/ICE_KC1", "CHRIS/CME_C1","CHRIS/ICE_KC1", "CHRIS/ICE_CC1", "CHRIS/CME_RR1", "CHRIS/ICE_SB1", "CHRIS/ICE_OJ1", "CHRIS/CME_O1", "CHRIS/CME_LN1","CHRIS/CME_LC1")
 quandl_api_key("iJVzgLaYsv3bWFfv1JTm")
 mydata = tq_get(list, get = "quandl", from = "2015-01-01", to ="2018-10-10")
 tail(mydata)
@@ -26,8 +26,8 @@ mydata = mydata %>% mutate(symbolNew = case_when(symbol == "CHRIS/CME_DA1" ~"CME
                                         symbol == "CHRIS/ICE_SB1" ~ "ICE Sugar Futures",
                                         symbol == "CHRIS/ICE_OJ1" ~ "Orange Juice Futures",
                                         symbol == "CHRIS/CME_O1" ~ "Oats Futures",
-                                        symbol == "CHRIS/CME_LC1" ~ "Cattle Futures",
-                                        symbol == "CHRIS/CME_LN1" ~ "Pork Futures",
+                                        symbol == "CHRIS/CME_LC1" ~ "CME Cattle Futures",
+                                        symbol == "CHRIS/CME_LN1" ~ "CME Pork Futures",
                                       
                                         TRUE ~ as.character(symbol)))
 ```
@@ -65,7 +65,7 @@ monthly_qty_by_cat2_ts <- monthly_qty_by_cat2_nest %>%
     mutate(data.ts = map(.x       = data.tbl, 
                          .f       = tk_ts, 
                          select   = -Date, 
-                         start    = 2016,
+                         start    = 2015,
                          freq     = 12))
 monthly_qty_by_cat2_ts
 ```
@@ -110,6 +110,7 @@ fig = monthly_qty_by_cat2_fcast_tidy %>%
     theme_tq() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 fig
+ggsave("commodityForcast.png", fig, height = 8, width = 12)
 ```
 
 ```{r}
