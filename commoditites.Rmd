@@ -10,7 +10,7 @@ library(tidyverse)
 library(tidyquant)
 list = c("CHRIS/CME_DA1", "CHRIS/ICE_KC1", "CHRIS/CME_C1","CHRIS/ICE_KC1", "CHRIS/ICE_CC1", "CHRIS/CME_RR1", "CHRIS/ICE_SB1", "CHRIS/ICE_OJ1", "CHRIS/CME_O1", "CHRIS/CME_LN1","CHRIS/CME_LC1")
 quandl_api_key("iJVzgLaYsv3bWFfv1JTm")
-mydata = tq_get(list, get = "quandl", from = "2015-01-01", to ="2018-10-10")
+mydata = tq_get(list, get = "quandl", from = "2015-01-01")
 tail(mydata)
 ```
 
@@ -45,7 +45,7 @@ mydata %>% ggplot(aes(date, settle, color= symbolNew)) +
 ```
 
 ```{r}
-mydata = mydata %>% select(date, symbolNew, settle) %>%  group_by(Date=floor_date(date, "month"), symbolNew) %>%
+mydata = mydata %>% select(date, symbolNew, settle) %>%  group_by(Date=floor_date(date, "week"), symbolNew) %>%
    summarize(settle=mean(settle))
 ```
 
@@ -66,13 +66,14 @@ monthly_qty_by_cat2_ts <- monthly_qty_by_cat2_nest %>%
                          .f       = tk_ts, 
                          select   = -Date, 
                          start    = 2015,
-                         freq     = 12))
+                         freq     = 52))
 monthly_qty_by_cat2_ts
 ```
 
 ```{r}
+library(forecast)
 monthly_qty_by_cat2_fit <- monthly_qty_by_cat2_ts %>%
-    mutate(fit.ets = map(data.ts, auto.arima))
+    mutate(fit.ets = map(data.ts, tbats))
 monthly_qty_by_cat2_fit
 ```
 ```{r}
@@ -86,7 +87,7 @@ augment_fit_ets
 
 ```{r}
 monthly_qty_by_cat2_fcast <- monthly_qty_by_cat2_fit %>%
-    mutate(fcast.ets = map(fit.ets, forecast, h = 12))
+    mutate(fcast.ets = map(fit.ets, forecast, h = 52))
 monthly_qty_by_cat2_fcast_tidy <- monthly_qty_by_cat2_fcast %>%
     mutate(sweep = map(fcast.ets, sw_sweep, fitted = FALSE, timetk_idx = TRUE)) %>%
     unnest(sweep)
